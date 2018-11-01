@@ -79,7 +79,7 @@ def em(data, K=2):
     return responsibilities
 
 
-def process_save(animal, data, responsibilities, K):
+def process_save(animal, data, responsibilities, k):
     max_responsibilities = [np.argmax(responsibilities[i]) for i in range(responsibilities.shape[0])]
     data_classified = np.zeros(data.shape)
     for i in range(data.shape[0]):
@@ -89,13 +89,12 @@ def process_save(animal, data, responsibilities, K):
         data_classified[i, 3] = (100/(k-1)) * max_responsibilities[i]
         data_classified[i, 4] = (100/(k-1)) * max_responsibilities[i]
     write_data(data_classified, animal+'_mask.txt')
-    for k in range(K):
+    for k in range(k):
         for i in range(data.shape[0]):
             data_classified[i, 2] = data[i, 2] * (max_responsibilities[i]==k)
             data_classified[i, 3] = data[i, 3] * (max_responsibilities[i]==k)
             data_classified[i, 4] = data[i, 4] * (max_responsibilities[i]==k)
         write_data(data_classified, animal+'_seg'+str(k)+'.txt')
-
 
 
 def add_index(img):
@@ -107,7 +106,7 @@ def add_index(img):
             copy[i, j, 2] = img[i, j, 0]
             copy[i, j, 3] = img[i, j, 1]
             copy[i, j, 4] = img[i, j, 2]
-    copy =copy.reshape((copy.shape[0]* copy.shape[1], 5))
+    copy =copy.reshape((copy.shape[0]*copy.shape[1], 5))
     return copy
 # for animal in ['cow', 'owl', 'zebra', 'fox']:
 #     print(animal)
@@ -119,15 +118,15 @@ def add_index(img):
 
 
 for image in ['pogba','marseille']:
-    img = cv2.imread(image+'.txt')
+    img = cv2.imread(image+'.jpg')
     copy = add_index(img)
-    np.save(image+'.txt', copy)
+    np.savetxt(image+'.txt', copy)
     k=2
     if image=='marseille':
         k=3
     data, image = read_data(image+".txt", False)
     responsibilities = em(data, k)
-    process_save(image, data, responsibilities)
+    process_save(image, data, responsibilities, k)
 
 
 
