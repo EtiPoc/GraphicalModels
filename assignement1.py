@@ -62,9 +62,9 @@ def compute_likelihood(data, means, stds, pis, K):
 def em(data, K=2):
     means, stds, pis = k_means_initialization(data, K)
     likelihood = 0
-    new_likelihood = 1
+    new_likelihood = 2
     responsibilities = np.zeros(data.shape)
-    while (likelihood - new_likelihood)**2 > 0.00000001:
+    while (likelihood - new_likelihood)**2 > 1:
         likelihood = new_likelihood
         #E-ste
         responsibilities = compute_responsibilities(data, means, stds, pis, K)
@@ -91,9 +91,9 @@ def process_save(animal, data, responsibilities, k):
     write_data(data_classified, animal+'_mask.txt')
     for k in range(k):
         for i in range(data.shape[0]):
-            data_classified[i, 2] = data[i, 2] * (max_responsibilities[i]==k)
-            data_classified[i, 3] = data[i, 3] * (max_responsibilities[i]==k)
-            data_classified[i, 4] = data[i, 4] * (max_responsibilities[i]==k)
+            data_classified[i, 2] = data[i, 2] * (max_responsibilities[i] == k)
+            data_classified[i, 3] = data[i, 3] * (max_responsibilities[i] == k)
+            data_classified[i, 4] = data[i, 4] * (max_responsibilities[i] == k)
         write_data(data_classified, animal+'_seg'+str(k)+'.txt')
 
 
@@ -124,7 +124,7 @@ for image in ['pogba','marseille']:
     k=2
     if image=='marseille':
         k=3
-    data, image = read_data(image+".txt", False)
+    data, useless = read_data(image+".txt", False)
     responsibilities = em(data, k)
     process_save(image, data, responsibilities, k)
 
