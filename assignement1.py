@@ -59,12 +59,12 @@ def compute_likelihood(data, means, stds, pis, K):
     return likelihood
 
 
-def em(data, K=2):
+def em(data, K=2, threshold = 1):
     means, stds, pis = k_means_initialization(data, K)
     likelihood = 0
     new_likelihood = 2
     responsibilities = np.zeros(data.shape)
-    while (likelihood - new_likelihood)**2 > 1:
+    while (likelihood - new_likelihood)**2 > threshold:
         likelihood = new_likelihood
         #E-ste
         responsibilities = compute_responsibilities(data, means, stds, pis, K)
@@ -86,8 +86,8 @@ def process_save(animal, data, responsibilities, k):
         data_classified[i, 0] = data[i, 0]
         data_classified[i, 1] = data[i, 1]
         data_classified[i, 2] = (100/(k-1)) * max_responsibilities[i]
-        data_classified[i, 3] = (100/(k-1)) * max_responsibilities[i]
-        data_classified[i, 4] = (100/(k-1)) * max_responsibilities[i]
+        data_classified[i, 3] = 0
+        data_classified[i, 4] = 0
     write_data(data_classified, animal+'_mask.txt')
     for k in range(k):
         for i in range(data.shape[0]):
@@ -106,21 +106,27 @@ def add_index(img):
             copy[i, j, 2] = img[i, j, 0]
             copy[i, j, 3] = img[i, j, 1]
             copy[i, j, 4] = img[i, j, 2]
-    copy =copy.reshape((copy.shape[0]*copy.shape[1], 5))
+    copy = copy.reshape((copy.shape[0]*copy.shape[1], 5))
+    for i in range(copy.shape[0]):
+        copy[i, 2] = 100 * copy[i, 2] / 255
+        copy[i, 3] = copy[i, 3] - 128
+        copy[i, 4] = copy[i, 4] - 128
     return copy
-# for animal in ['cow', 'owl', 'zebra', 'fox']:
-#     print(animal)
-#     data, image = read_data("../a2/"+animal+".txt", False)
-#     print('start em')
-#     responsibilities = em(data, 2)
-#     print("process")
-#     process_save(animal, data, responsibilities)
+
+for animal in ['cow', 'owl', 'zebra', 'fox']:
+    print(animal)
+    data, image = read_data("../a2/"+animal+".txt", False)
+    print('start em')
+    responsibilities = em(data, 2, threshold=0.0000001)
+    print("process")
+    process_save(animal, data, responsibilities)
 
 
 for image in ['pogba','marseille']:
     img = cv2.imread(image+'.jpg')
-    copy = add_index(img)
-    np.savetxt(image+'.txt', copy)
+    img2 = cv2.cvtColor(img, cv2.COLOR_BGR2Lab)
+    copy = add_index(img2)
+    write_data(copy, 'marseille.txt')
     k=2
     if image=='marseille':
         k=3
