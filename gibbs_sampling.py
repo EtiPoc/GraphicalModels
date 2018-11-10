@@ -103,7 +103,6 @@ def gibbs_sampling(data):
             denoized_data = transform_back_values(epoch)
             denoized_data = transform_back_shape(denoized_data)
             write_data(denoized_data, str(J)+'_J_'+str(sigma)+'_sigma_'+ str(t)+'_epoch'+str(filenumber)+'_noise.txt')
-            read_data(str(t)+'_epoch.txt', True, True)
     return observations
 
 
@@ -118,7 +117,7 @@ def denoise_gibbs(filenumber):
     denoized_data = transform_back_values(denoized_data)
     denoized_data = transform_back_shape(denoized_data)
     write_data(denoized_data, 'final_denoised'+str(filenumber)+'_noise.txt')
-    read_data('final_denoised'+str(J)+'_J_'+str(sigma)+'_sigma_' + str(filenumber)+'_noise.txt', True, True)
+    read_data('final_denoised'+str(J)+'_J_'+str(sigma)+'_sigma_' + str(filenumber)+'_noise.txt', True, False, True)
     return denoized_data
 
 
