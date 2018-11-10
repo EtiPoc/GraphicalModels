@@ -116,7 +116,7 @@ def variational_inference(data):
     entropy = compute_entropy(data, mus)
     iter = 0
     print("initialized")
-    while abs(entropy-new_entropy) > 0.00001:
+    while abs(entropy-new_entropy) > 0.0001:
         iter += 1
         entropy = new_entropy
         for i in range(data.shape[0]):
