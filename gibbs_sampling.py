@@ -3,9 +3,9 @@ import numpy as np
 import scipy.stats
 import math
 
-T = 2
-J = 1
-sigma = 2
+num_iter = 20
+J = 0.5
+sigma = 1
 
 
 def transform_data_shape(data):
@@ -38,31 +38,33 @@ def transform_back_values(data):
     return data
 
 
-def find_neighbors(i,j, square_size):
+def find_neighbors(i, j, square_size):
     square_size = square_size-1
     neighbors = []
     if i == 0:
         if j==0:
-            neighbors += [[i, j+1], [i+1, j], [i+1, j+1]]
+            neighbors += [[i, j+1], [i+1, j]]
         elif j == square_size:
-            neighbors += [[i, j - 1], [i + 1, j], [i + 1, j - 1]]
+            neighbors += [[i, j - 1], [i + 1, j]]
         else :
-            neighbors += [[i, j - 1], [i + 1, j], [i + 1, j - 1], [i, j+1] , [i+1, j+1]]
+            neighbors += [[i, j - 1], [i + 1, j], [i, j+1]]
     elif i == square_size:
         if j==0:
-            neighbors += [[i, j+1], [i-1, j], [i-1, j+1]]
+            neighbors += [[i, j+1], [i-1, j]]
         elif j == square_size:
-            neighbors += [[i, j - 1], [i - 1, j], [i - 1, j - 1]]
+            neighbors += [[i, j - 1], [i - 1, j]]
         else :
-            neighbors += [[i, j - 1], [i - 1, j - 1], [i, j + 1], [i - 1, j], [i - 1, j + 1]]
+            neighbors += [[i, j - 1], [i, j + 1], [i - 1, j]]
     else:
         if j == 0:
-            neighbors += [[i, j + 1], [i + 1, j], [i + 1, j + 1], [i - 1, j], [i - 1, j + 1]]
+            neighbors += [[i, j + 1], [i + 1, j], [i - 1, j]]
         elif j == square_size:
-            neighbors += [[i, j - 1], [i + 1, j], [i + 1, j - 1], [i - 1, j], [i - 1, j - 1]]
+            neighbors += [[i, j - 1], [i + 1, j], [i - 1, j]]
         else:
-            neighbors += [[i, j - 1], [i + 1, j], [i + 1, j - 1], [i - 1, j], [i - 1, j - 1], [i, j + 1], [i - 1, j + 1],  [i + 1, j + 1]]
+            neighbors += [[i, j - 1], [i + 1, j], [i - 1, j], [i, j + 1]]
     return neighbors
+
+
 
 
 def sum_neighbors(neighbors, data):
@@ -75,18 +77,18 @@ def sum_neighbors(neighbors, data):
 def gibbs_sampling(data):
     observations = data
     square_size = observations.shape[0]
-    for t in range(T):
+    for t in range(num_iter):
         print('epoch ', t)
         for i in range(square_size):
-            print(' line ', i)
+            # print(' line ', i)
             for j in range(square_size):
                 y = observations[i, j]
-                print(y)
+                # print(y)
                 local_evidence_law = scipy.stats.norm(y, sigma)
 
                 neighbors = find_neighbors(i, j, square_size)
                 sum_neigh = sum_neighbors(neighbors, data)
-                print(J, sum_neigh)
+                # print(J, sum_neigh)
                 term_1 = local_evidence_law.pdf(1) * math.exp(J*sum_neigh)
                 term_minus_1 = local_evidence_law.pdf(-1) * math.exp(- J * sum_neigh)
 
@@ -96,16 +98,17 @@ def gibbs_sampling(data):
                     observations[i, j] = 1
                 else:
                     observations[i, j] = -1
-        epoch = observations.copy()
-        denoized_data = transform_back_values(epoch)
-        denoized_data = transform_back_shape(denoized_data)
-        write_data(denoized_data, str(J)+'_J_'+str(sigma)+'_sigma_'+ str(t)+'_epoch'+str(filenumber)+'_noise.txt')
-        # read_data(str(t)+'_epoch.txt', True, True)
+        if (t%5) ==0:
+            epoch = observations.copy()
+            denoized_data = transform_back_values(epoch)
+            denoized_data = transform_back_shape(denoized_data)
+            write_data(denoized_data, str(J)+'_J_'+str(sigma)+'_sigma_'+ str(t)+'_epoch'+str(filenumber)+'_noise.txt')
+            read_data(str(t)+'_epoch.txt', True, True)
     return observations
 
 
 def denoise_gibbs(filenumber):
-    data, image = read_data('a1/'+str(filenumber)+'_noise.txt', True)
+    data, image = read_data(str(filenumber)+'_noise.txt', True)
     data = transform_data_shape(data)
     # put data in {-1, 1} space
     data = transform_data_values(data)
@@ -119,7 +122,9 @@ def denoise_gibbs(filenumber):
     return denoized_data
 
 
-for filenumber in range(1,4):
-    for sigma in [0.5, 1, 2]:
-        for J in [0.5, 1, 2]:
-            denoise_gibbs(filenumber)
+for filenumber in range(1,5):
+    #     for sigma in [0.5, 1, 2]:
+    #         for J in [0.5, 1, 2]:
+    denoise_gibbs(filenumber)
+
+
