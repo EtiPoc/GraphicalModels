@@ -116,24 +116,11 @@ def add_index(img):
 
 # for animal in ['cow', 'owl', 'zebra', 'fox']:
 #     print(animal)
-#     data, image = read_data("../a2/"+animal+".txt", False)
+#     data, image = read_data(animal+".txt", False)
 #     print('start em')
 #     responsibilities = em(data, 2, threshold=0.0000001)
 #     print("process")
 #     process_save(animal, data, responsibilities, 2)
-
-
-for image in ['pogba','marseille']:
-    img = cv2.imread(image+'.jpg')
-    img2 = cv2.cvtColor(img, cv2.COLOR_BGR2Lab)
-    copy = add_index(img2)
-    write_data(copy, image+'.txt')
-    k=2
-    if image=='marseille':
-        k=3
-    data, useless = read_data(image+".txt", False)
-    responsibilities = em(data, k)
-    process_save(image, data, responsibilities, k)
 
 
 
