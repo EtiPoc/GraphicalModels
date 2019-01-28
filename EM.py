@@ -116,13 +116,16 @@ def add_index(img):
     return copy
 
 
-for animal in ['cow', 'owl', 'zebra', 'fox']:
-    print(animal)
-    data, image = read_data("../a2/"+animal+".txt", False)
-    print('start em')
-    responsibilities = em(data, 2, threshold=0.0000001)
-    print("process")
-    process_save(animal, data, responsibilities, 2)
+
+# for animal in ['cow', 'owl', 'zebra', 'fox']:
+#     print(animal)
+#     data, image = read_data(animal+".txt", False)
+#     print('start em')
+#     responsibilities = em(data, 2, threshold=0.0000001)
+#     print("process")
+#     process_save(animal, data, responsibilities, 2)
+
+
 
 
 
