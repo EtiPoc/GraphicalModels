@@ -5,7 +5,9 @@ import scipy.stats
 import math
 import cv2
 
+
 def k_means_initialization(data, K):
+    """initialise the parameters of the multivariate gaussian with kmeans algorithm"""
     means, labels = kmeans2(data[:, [2, 3, 4]], K)
     stds = [np.cov(data[labels == k][:, [2, 3, 4]].T) for k in range(K)]
     pis = [sum(labels == k)/data.shape[0] for k in range(K)]
@@ -59,14 +61,14 @@ def compute_likelihood(data, means, stds, pis, K):
     return likelihood
 
 
-def em(data, K=2, threshold = 1):
+def em(data, K=2, threshold = 1.):
     means, stds, pis = k_means_initialization(data, K)
     likelihood = 0
     new_likelihood = 2
     responsibilities = np.zeros(data.shape)
     while (likelihood - new_likelihood)**2 > threshold:
         likelihood = new_likelihood
-        #E-ste
+        #E-step
         responsibilities = compute_responsibilities(data, means, stds, pis, K)
         N = sum(responsibilities)
         print(N)
@@ -114,28 +116,13 @@ def add_index(img):
     return copy
 
 
-# for animal in ['cow', 'owl', 'zebra', 'fox']:
-#     print(animal)
-#     data, image = read_data("../a2/"+animal+".txt", False)
-#     print('start em')
-#     responsibilities = em(data, 2, threshold=0.0000001)
-#     print("process")
-#     process_save(animal, data, responsibilities, 2)
-
-
-for image in ['pogba','marseille']:
-    img = cv2.imread(image+'.jpg')
-    img2 = cv2.cvtColor(img, cv2.COLOR_BGR2Lab)
-    copy = add_index(img2)
-    write_data(copy, image+'.txt')
-    k=2
-    if image=='marseille':
-        k=3
-    data, useless = read_data(image+".txt", False)
-    responsibilities = em(data, k)
-    process_save(image, data, responsibilities, k)
-
-
+for animal in ['cow', 'owl', 'zebra', 'fox']:
+    print(animal)
+    data, image = read_data("../a2/"+animal+".txt", False)
+    print('start em')
+    responsibilities = em(data, 2, threshold=0.0000001)
+    print("process")
+    process_save(animal, data, responsibilities, 2)
 
 
 

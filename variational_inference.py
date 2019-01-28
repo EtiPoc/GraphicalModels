@@ -12,14 +12,15 @@ L_1 = scipy.stats.norm(-1, sigma)
 
 
 def transform_data_shape(data):
-    square_size = int(data[-1, 0])+1
-    new_data = np.zeros((square_size, square_size))
+    """transform data to 2d-array so we can access pixels with [i,j]"""
+    new_data = np.zeros((int(data[-1, 0])+1, int(data[-1, 1])+1))
     for row in data:
         new_data[int(row[0]), int(row[1])] = row[2]
     return new_data
 
 
 def transform_back_shape(data):
+    """put it back to original shape"""
     new_data = []
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
@@ -28,6 +29,7 @@ def transform_back_shape(data):
 
 
 def transform_data_values(data):
+    """[0,255] to [-1,1]"""
     data /= 255
     data -= 0.5
     data *= 2
@@ -35,33 +37,34 @@ def transform_data_values(data):
 
 
 def transform_back_values(data):
+    """[1,1] to [0,255]"""
     data /= 2
     data += 0.5
     data *= 255
     return data
 
 
-def find_neighbors(i,j, square_size):
-    square_size = square_size-1
+def find_neighbors(i, j, i_bound, j_bound):
+    """find de neighbors of pixel (i,j) in a square of size squaresize"""
     neighbors = []
     if i == 0:
-        if j==0:
+        if j == 0:
             neighbors += [[i, j+1], [i+1, j]]
-        elif j == square_size:
+        elif j == j_bound:
             neighbors += [[i, j - 1], [i + 1, j]]
-        else :
+        else:
             neighbors += [[i, j - 1], [i + 1, j], [i, j+1]]
-    elif i == square_size:
-        if j==0:
+    elif i == i_bound:
+        if j == 0:
             neighbors += [[i, j+1], [i-1, j]]
-        elif j == square_size:
+        elif j == j_bound:
             neighbors += [[i, j - 1], [i - 1, j]]
-        else :
+        else:
             neighbors += [[i, j - 1], [i, j + 1], [i - 1, j]]
     else:
         if j == 0:
             neighbors += [[i, j + 1], [i + 1, j], [i - 1, j]]
-        elif j == square_size:
+        elif j == j_bound:
             neighbors += [[i, j - 1], [i + 1, j], [i - 1, j]]
         else:
             neighbors += [[i, j - 1], [i + 1, j], [i - 1, j], [i, j + 1]]
@@ -71,12 +74,13 @@ def find_neighbors(i,j, square_size):
 def sum_neighbors(neighbors, data):
     sum = 0
     for neighbor in neighbors:
+        #we compute the mean field influence with all Wij=1
         sum += data[neighbor[0], neighbor[1]]
     return sum
 
 
 def qi(i, j, x, data, mu):
-    mean_field = sum_neighbors(find_neighbors(i,j, data.shape[0]), mu)
+    mean_field = sum_neighbors(find_neighbors(i,j, data.shape[0]-1, data.shape[1]-1), mu)
     if data[i, j] == 1:
         L = L1
     else:
@@ -93,7 +97,7 @@ def compute_entropy(data, mu):
 
 
 def update_mu(i, j, data, mu):
-    mean_field = sum_neighbors(find_neighbors(i, j, data.shape[0]), mu)
+    mean_field = sum_neighbors(find_neighbors(i, j, data.shape[0]-1, data.shape[1]-1), mu)
     if data[i, j] == 1:
         L = L1
     else:
@@ -126,6 +130,7 @@ def variational_inference(data):
         print(new_entropy)
         iter_mus = mus.copy()
         denoized_data = np.round(iter_mus)
+        denoized_data = transform_back_values(denoized_data)
         denoized_data = transform_back_shape(denoized_data)
         write_data(denoized_data,
                    str(J) + '_J_' + str(sigma) + '_sigma_' + str(iter) + '_epoch' + str(filenumber) + '_noise_vi.txt')
@@ -145,7 +150,7 @@ def draw_new_samples(data):
 
 
 for filenumber in range(1,5):
-    data, image = read_data(str(filenumber)+'_noise.txt', True)
+    data, image = read_data('../a1/'+str(filenumber)+'_noise.txt', True)
     data = transform_data_shape(data)
     # put data in {-1, 1} space
     data = transform_data_values(data)
